@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protocoles — Réanimation (démo)</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14484a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Protocoles">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fbf9f5; --ink:#1b1a17; --muted:#6c6760; --line:#e3ddd2;
+  --accent:#14484a; --accent-soft:#e6efed; --card:#ffffff; --hl:#fde68a;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#15171a; --ink:#ecebe7; --muted:#9a9790; --line:#2b2e33;
+    --accent:#7fd1cd; --accent-soft:#1d2b2c; --card:#1b1e21; --hl:#5c4a12;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:Inter,system-ui,-apple-system,sans-serif;
+  font-size:16px; line-height:1.6;
+  padding-bottom:3rem;
+}
+.wrap{max-width:720px;margin:0 auto;padding:0 1.1rem}
+
+header{
+  position:sticky; top:0; z-index:10;
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter:saturate(1.4) blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.bar{display:flex;align-items:center;gap:.6rem;padding:.75rem 0 .2rem}
+.mark{
+  width:30px;height:30px;border-radius:8px;flex:0 0 auto;
+  background:var(--accent);color:#fff;display:grid;place-items:center;
+  font-family:'Instrument Serif',serif;font-size:1.05rem;line-height:1;
+}
+@media (prefers-color-scheme: dark){ .mark{color:#0f1113} }
+.brand{font-family:'Instrument Serif',serif;font-size:1.3rem;letter-spacing:.1px}
+.net{
+  margin-left:auto;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:.2rem .5rem;
+}
+.net.off{color:#b45309;border-color:#b45309}
+.searchrow{padding:.35rem 0 .8rem;position:relative}
+input[type=search]{
+  width:100%;appearance:none;-webkit-appearance:none;
+  font:inherit;font-size:1rem;color:var(--ink);
+  background:var(--card);border:1px solid var(--line);border-radius:11px;
+  padding:.62rem .8rem .62rem 2.2rem;
+}
+input[type=search]:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.mag{position:absolute;left:.72rem;top:50%;transform:translateY(-60%);color:var(--muted);pointer-events:none}
+
+.demo{
+  margin:.9rem 0 0;padding:.6rem .75rem;border-radius:10px;
+  background:var(--accent-soft);color:var(--ink);
+  font-size:.82rem;line-height:1.45;
+}
+.updated{color:var(--muted);font-size:.8rem;margin:1rem 0 .2rem}
+
+h2.cat{
+  font-family:'Instrument Serif',serif;font-weight:400;
+  font-size:1.02rem;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--muted);margin:1.6rem 0 .5rem;
+}
+.card{
+  display:block;width:100%;text-align:left;cursor:pointer;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:.8rem .9rem;margin-bottom:.5rem;font:inherit;color:inherit;
+}
+.card:active{transform:scale(.995)}
+.card .t{font-weight:600;font-size:1rem;line-height:1.35}
+.card .s{color:var(--muted);font-size:.84rem;margin-top:.15rem}
+.card .snip{font-size:.85rem;margin-top:.35rem;color:var(--muted)}
+mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 .1em}
+
+.back{
+  background:none;border:0;font:inherit;color:var(--accent);
+  padding:.9rem 0 .2rem;cursor:pointer;font-size:.9rem;
+}
+article h1{
+  font-family:'Instrument Serif',serif;font-weight:400;
+  font-size:1.9rem;line-height:1.15;margin:.3rem 0 .35rem;
+}
+article .meta{color:var(--muted);font-size:.8rem;margin-bottom:1.2rem}
+article h3{font-size:1rem;margin:1.7rem 0 .4rem}
+article p{margin:.6rem 0}
+article ul{margin:.5rem 0;padding-left:1.15rem}
+article li{margin:.25rem 0}
+.hidden{display:none}
+.empty{color:var(--muted);padding:1.5rem 0;text-align:center}
+footer{color:var(--muted);font-size:.76rem;border-top:1px solid var(--line);margin-top:2.5rem;padding-top:1rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="bar">
+      <div class="mark">P</div>
+      <div class="brand">Protocoles</div>
+      <div class="net" id="net">hors ligne OK</div>
+    </div>
+    <div class="searchrow">
+      <svg class="mag" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input type="search" id="q" placeholder="Rechercher un protocole, un mot…" autocomplete="off" enterkeyhint="search">
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="home">
+    <div class="demo"><strong>Maquette de démonstration.</strong> Les titres donnent la structure ; tous les textes sont du remplissage sans aucune valeur médicale.</div>
+    <div class="updated" id="updated"></div>
+    <div id="list"></div>
+  </div>
+
+  <div id="results" class="hidden">
+    <div id="rlist"></div>
+  </div>
+
+  <div id="doc" class="hidden">
+    <button class="back" id="back">← Retour</button>
+    <article id="article"></article>
+  </div>
+
+  <footer>
+    Démonstration · contenu fictif · v0.1 — une fois installée, l'application reste disponible sans réseau et se met à jour dès qu'une connexion est trouvée.
+  </footer>
+</main>
+
+<script>
+const DOCS = [
+  { id:"choc-septique", cat:"Hémodynamique", title:"Prise en charge initiale du choc septique", sub:"Remplissage, vasopresseurs, monitorage", rev:"v3.1 — mars 2026" },
+  { id:"choc-cardiogenique", cat:"Hémodynamique", title:"Choc cardiogénique", sub:"Inotropes, assistance, orientation", rev:"v2.4 — janvier 2026" },
+  { id:"monitorage-hemodynamique", cat:"Hémodynamique", title:"Monitorage hémodynamique", sub:"Indications et interprétation", rev:"v1.8 — octobre 2025" },
+  { id:"sdra", cat:"Ventilation", title:"SDRA — réglages ventilatoires", sub:"Volume courant, PEP, décubitus ventral", rev:"v4.0 — avril 2026" },
+  { id:"sevrage-ventilatoire", cat:"Ventilation", title:"Sevrage de la ventilation mécanique", sub:"Épreuve de ventilation spontanée, critères", rev:"v2.2 — février 2026" },
+  { id:"intubation-sequence-rapide", cat:"Ventilation", title:"Intubation en séquence rapide", sub:"Check-list, préoxygénation, drogues", rev:"v3.0 — mai 2026" },
+  { id:"lyse-tumorale", cat:"Métabolique et rénal", title:"Prévention du syndrome de lyse tumorale", sub:"Hydratation, surveillance, rasburicase", rev:"v2.0 — septembre 2026" },
+  { id:"epuration-extrarenale", cat:"Métabolique et rénal", title:"Épuration extrarénale continue", sub:"Indications, anticoagulation du circuit", rev:"v1.5 — décembre 2025" },
+  { id:"catheter-central", cat:"Procédures", title:"Pose de cathéter veineux central", sub:"Repérage échographique, asepsie", rev:"v2.7 — juin 2025" },
+  { id:"transfusion-massive", cat:"Procédures", title:"Protocole de transfusion massive", sub:"Déclenchement, ratios, surveillance", rev:"v1.9 — août 2026" }
+];
+
+const FILLER = [
+  "Ce paragraphe est un texte de remplissage destiné à montrer la mise en page de l'application. Il ne contient aucune information clinique et sera remplacé par le contenu réel du livret du service.",
+  "Le texte définitif reprendra les éléments validés par les référents du service, avec la même structure : indications, conduite à tenir, points de vigilance et références internes.",
+  "Chaque paragraphe conserve une longueur réaliste afin de vérifier le confort de lecture sur un écran de téléphone, en particulier la taille de police et les marges."
+];
+const FILL_LIST = [
+  "Premier élément de liste, texte d'exemple sans portée médicale.",
+  "Deuxième élément, destiné à montrer la lisibilité des énumérations.",
+  "Troisième élément, qui sera remplacé par le contenu réel du protocole.",
+  "Quatrième élément d'exemple."
+];
+
+function body(d){
+  const h = [];
+  h.push('<h3>Objet et champ d\'application</h3>');
+  h.push('<p>'+FILLER[0]+'</p>');
+  h.push('<h3>Conduite à tenir</h3>');
+  h.push('<p>'+FILLER[1]+'</p>');
+  h.push('<ul>'+FILL_LIST.map(x=>'<li>'+x+'</li>').join('')+'</ul>');
+  h.push('<h3>Points de vigilance</h3>');
+  h.push('<p>'+FILLER[2]+'</p>');
+  h.push('<ul>'+FILL_LIST.slice(0,3).map(x=>'<li>'+x+'</li>').join('')+'</ul>');
+  h.push('<h3>Références internes</h3>');
+  h.push('<p>Renvoi vers les autres chapitres du livret, ajouté lors de la mise en forme du contenu réel.</p>');
+  return h.join('');
+}
+
+DOCS.forEach(d=>{ d.html = body(d); d.text = (d.title+' '+d.sub+' '+d.html.replace(/<[^>]+>/g,' ')).replace(/\s+/g,' '); });
+
+const el = id => document.getElementById(id);
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function card(d, snip){
+  return '<button class="card" data-id="'+d.id+'"><div class="t">'+esc(d.title)+'</div>'+
+         '<div class="s">'+esc(d.sub)+'</div>'+
+         (snip ? '<div class="snip">'+snip+'</div>' : '')+'</button>';
+}
+
+function renderHome(){
+  el('updated').textContent = DOCS.length + ' protocoles · dernière synchronisation le 3 novembre 2026';
+  let html = '', cat = null;
+  DOCS.forEach(d=>{
+    if(d.cat !== cat){ cat = d.cat; html += '<h2 class="cat">'+esc(cat)+'</h2>'; }
+    html += card(d);
+  });
+  el('list').innerHTML = html;
+}
+
+function snippet(d, term){
+  const i = d.text.toLowerCase().indexOf(term);
+  if(i < 0) return '';
+  const start = Math.max(0, i - 40);
+  const raw = (start > 0 ? '… ' : '') + d.text.slice(start, i + term.length + 70).trim() + ' …';
+  const re = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'gi');
+  return esc(raw).replace(re, m => '<mark>'+m+'</mark>');
+}
+
+function search(term){
+  term = term.trim().toLowerCase();
+  if(!term){ show('home'); return; }
+  const hits = DOCS.filter(d => d.text.toLowerCase().includes(term));
+  el('rlist').innerHTML = hits.length
+    ? '<div class="updated">'+hits.length+' résultat'+(hits.length>1?'s':'')+'</div>' + hits.map(d=>card(d, snippet(d,term))).join('')
+    : '<div class="empty">Aucun résultat pour « '+esc(term)+' »</div>';
+  show('results');
+}
+
+function show(view){
+  ['home','results','doc'].forEach(v => el(v).classList.toggle('hidden', v !== view));
+}
+
+function openDoc(id){
+  const d = DOCS.find(x=>x.id===id);
+  if(!d) return;
+  el('article').innerHTML = '<h1>'+esc(d.title)+'</h1><div class="meta">'+esc(d.cat)+' · '+esc(d.rev)+'</div>'+d.html;
+  show('doc');
+  window.scrollTo(0,0);
+}
+
+document.addEventListener('click', e=>{
+  const b = e.target.closest('.card');
+  if(b){ location.hash = b.dataset.id; }
+});
+el('back').addEventListener('click', ()=>{ history.length>1 ? history.back() : (location.hash=''); });
+el('q').addEventListener('input', e=>{
+  if(location.hash) { location.hash = ''; }
+  search(e.target.value);
+});
+
+function route(){
+  const h = location.hash.replace(/^#/,'');
+  if(h && DOCS.some(d=>d.id===h)){ openDoc(h); }
+  else { el('q').value ? search(el('q').value) : show('home'); }
+}
+window.addEventListener('hashchange', route);
+
+function net(){
+  const n = el('net');
+  if(navigator.onLine){ n.textContent='à jour'; n.classList.remove('off'); }
+  else { n.textContent='hors ligne'; n.classList.add('off'); }
+}
+window.addEventListener('online', net);
+window.addEventListener('offline', net);
+
+renderHome(); route(); net();
+
+if('serviceWorker' in navigator){
+  try { navigator.serviceWorker.register('sw.js').catch(()=>{}); } catch(e){}
+}
+</script>
+</body>
+</html>
